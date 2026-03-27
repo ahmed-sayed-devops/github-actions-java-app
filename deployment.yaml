@@ -8,6 +8,12 @@ metadata:
 spec:
   replicas: 2
 
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+
   selector:
     matchLabels:
       app: java-app
@@ -20,8 +26,8 @@ spec:
     spec:
       containers:
       - name: java-app
-
         image: a7medsayed/simple-java-app:latest
+        imagePullPolicy: Always
 
         ports:
         - containerPort: 8080
@@ -30,7 +36,20 @@ spec:
           requests:
             cpu: "200m"
             memory: "256Mi"
-
           limits:
             cpu: "500m"
             memory: "512Mi"
+
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
